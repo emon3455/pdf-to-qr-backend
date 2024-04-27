@@ -8,9 +8,8 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 
 // Database connection
-const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zyyhzcl.mongodb.net/todoDB?retryWrites=true&w=majority`; 
-const options = {
-};
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zyyhzcl.mongodb.net/todoDB?retryWrites=true&w=majority`;
+const options = {};
 
 const DBConnection = () => {
   try {
@@ -65,6 +64,22 @@ app.get("/file/:id", async (req, res) => {
       return res.status(404).json({ error: "File not found" });
     }
     res.set("Content-Type", file.contentType);
+    res.send(file.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+// Add a new endpoint to serve the file data
+app.get("/download-file/:id", async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) {
+      return res.status(404).json({ error: "File not found" });
+    }
+    res.set("Content-Type", file.contentType);
+    res.set("Content-Disposition", "attachment; filename=file.pdf");
     res.send(file.data);
   } catch (error) {
     console.error(error);
